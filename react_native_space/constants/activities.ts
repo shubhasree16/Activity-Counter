@@ -15,4 +15,4 @@ export const ACTIVITIES: ActivityDef[] = [
   { id: 'walk', name: 'Walk', target: 1, iconType: 'walk' },
 ];
 
-export const TOTAL_SESSIONS = ACTIVITIES.reduce((sum, a) => sum + a.target, 0);
+export const TOTAL_SESSIONS = ACTIVITIES.reduce((sum, a) => sum + a.target, 0); // 7

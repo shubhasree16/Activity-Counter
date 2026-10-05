@@ -10,11 +10,13 @@ import {
   saveHistory,
   loadSettings,
   saveSettings,
+  DEFAULT_SETTINGS,
   type WeekData,
   type HistoryEntry,
   type AppSettings,
 } from '../utils/storage';
 import { getCurrentMonday, toDateString, getSundayFromMonday } from '../utils/weekUtils';
+import { syncDailyReminders } from '../utils/notifications';
 
 interface DataContextType {
   currentWeek: WeekData;
@@ -35,7 +37,7 @@ const defaultWeek: WeekData = {
 const DataContext = createContext<DataContextType>({
   currentWeek: defaultWeek,
   history: [],
-  settings: { remindersEnabled: false, reminderTime: '08:00' },
+  settings: DEFAULT_SETTINGS,
   completedCount: 0,
   toggleSession: () => {},
   resetWeek: async () => {},
@@ -50,7 +52,7 @@ export function useData() {
 export function DataProvider({ children }: { children: ReactNode }) {
   const [currentWeek, setCurrentWeek] = useState<WeekData>(defaultWeek);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [settings, setSettings] = useState<AppSettings>({ remindersEnabled: false, reminderTime: '08:00' });
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -67,6 +69,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         let hist = storedHistory ?? [];
 
         if (week && week.weekStart !== currentMondayStr) {
+          // Auto-save old week to history and reset
           const completed = countCompleted(week?.sessions ?? createEmptySessions());
           const entry: HistoryEntry = {
             weekStart: week.weekStart,
@@ -87,14 +90,39 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setCurrentWeek(week);
         setHistory(hist);
         if (storedSettings) setSettings(storedSettings);
-      } catch {
+      } catch (e) {
+        console.error('Failed to load saved data', e);
       } finally {
         setIsLoading(false);
       }
     })();
   }, []);
 
+  const updateSettings = useCallback((partial: Partial<AppSettings>) => {
+    setSettings((prev) => {
+      const next = { ...prev, ...partial };
+      saveSettings(next);
+      return next;
+    });
+  }, []);
+
+  // Keep the daily "missed a box" reminders in sync with settings and today's check-ins
+  useEffect(() => {
+    if (isLoading) return;
+    syncDailyReminders(
+      settings.remindersEnabled,
+      settings.reminderTime,
+      settings.lastCheckDate,
+      settings.userName,
+    );
+  }, [isLoading, settings.remindersEnabled, settings.reminderTime, settings.lastCheckDate, settings.userName]);
+
   const toggleSession = useCallback((activityId: ActivityId, index: number) => {
+    const wasChecked = currentWeek?.sessions?.[activityId]?.[index] ?? false;
+    if (!wasChecked) {
+      const today = toDateString(new Date());
+      if (settings.lastCheckDate !== today) updateSettings({ lastCheckDate: today });
+    }
     setCurrentWeek((prev) => {
       const sessions = { ...(prev?.sessions ?? createEmptySessions()) };
       const arr = [...(sessions[activityId] ?? [])];
@@ -106,7 +134,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       saveCurrentWeek(next);
       return next;
     });
-  }, []);
+  }, [currentWeek, settings.lastCheckDate, updateSettings]);
 
   const resetWeek = useCallback(async () => {
     const completed = countCompleted(currentWeek?.sessions ?? createEmptySessions());
@@ -127,14 +155,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
     await saveHistory(newHistory);
     await saveCurrentWeek(newWeek);
   }, [currentWeek, history]);
-
-  const updateSettings = useCallback((partial: Partial<AppSettings>) => {
-    setSettings((prev) => {
-      const next = { ...prev, ...partial };
-      saveSettings(next);
-      return next;
-    });
-  }, []);
 
   const completedCount = countCompleted(currentWeek?.sessions ?? createEmptySessions());
 

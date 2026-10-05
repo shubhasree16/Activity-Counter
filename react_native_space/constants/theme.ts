@@ -14,8 +14,12 @@ export const Fonts = {
   body: 'CormorantGaramond_400Regular',
   label: 'CormorantGaramond_300Light_Italic',
   caption: 'CormorantGaramond_300Light_Italic',
+  // Fallbacks
   fallbackSerif: 'serif',
 } as const;
+
+// Every screen title uses this one size so headers look identical across tabs
+export const TitleSize = 38;
 
 export const Spacing = {
   xs: 4,
