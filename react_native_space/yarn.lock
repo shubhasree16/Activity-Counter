@@ -9522,6 +9522,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-android-widget@npm:^0.22.1":
+  version: 0.22.1
+  resolution: "react-native-android-widget@npm:0.22.1"
+  peerDependencies:
+    expo: ">=54.0.0"
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    expo:
+      optional: true
+  checksum: 10c0/d8aa12694714ce24ff039e14c70aa7921222d0b107507dd391d56f905e2b0e5c0c858d067d60b8eccd6a7f928677904bc27930b51de5df5394b087d6f74dd3c2
+  languageName: node
+  linkType: hard
+
 "react-native-chart-kit@npm:^6.12.0":
   version: 6.12.3
   resolution: "react-native-chart-kit@npm:6.12.3"
@@ -9881,6 +9895,7 @@ __metadata:
     react: "npm:19.1.0"
     react-dom: "npm:19.1.0"
     react-native: "npm:0.81.5"
+    react-native-android-widget: "npm:^0.22.1"
     react-native-chart-kit: "npm:^6.12.0"
     react-native-circular-progress: "npm:^1.4.1"
     react-native-dotenv: "npm:^3.4.11"

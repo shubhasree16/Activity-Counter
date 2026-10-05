@@ -51,6 +51,45 @@
           "defaultChannel": "default",
           "color": "#FF1F8E"
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "fonts": [
+            "./assets/fonts/CormorantGaramond_700Bold_Italic.ttf",
+            "./assets/fonts/CormorantGaramond_600SemiBold.ttf"
+          ],
+          "widgets": [
+            {
+              "name": "WeeklyBoard",
+              "label": "Weekly Board",
+              "description": "Week date, your count and all five activities with tick boxes",
+              "minWidth": "250dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "maxResizeWidth": "500dp",
+              "maxResizeHeight": "260dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget-preview/weekly_board.png"
+            },
+            {
+              "name": "WeekStrip",
+              "label": "Week Strip",
+              "description": "One circle per day, pink when you ticked something",
+              "minWidth": "250dp",
+              "minHeight": "40dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 1,
+              "maxResizeWidth": "500dp",
+              "maxResizeHeight": "120dp",
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget-preview/week_strip.png"
+            }
+          ]
+        }
       ]
     ],
     "scheme": "abacusai1791197654"

@@ -10,6 +10,8 @@ const KEYS = {
 export interface WeekData {
   weekStart: string; // YYYY-MM-DD (Monday)
   sessions: Record<ActivityId, boolean[]>;
+  // Date (YYYY-MM-DD) each session box was ticked, parallel to `sessions`. Absent in older saves.
+  tickDates?: Record<ActivityId, (string | null)[]>;
 }
 
 export interface HistoryEntry {
@@ -41,6 +43,16 @@ export function createEmptySessions(): Record<ActivityId, boolean[]> {
     gym: [false, false],
     yoga: [false],
     walk: [false],
+  };
+}
+
+export function createEmptyTickDates(): Record<ActivityId, (string | null)[]> {
+  return {
+    swimming: [null],
+    pilates: [null, null],
+    gym: [null, null],
+    yoga: [null],
+    walk: [null],
   };
 }
 

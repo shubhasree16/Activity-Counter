@@ -1,22 +1,21 @@
-import React, { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState, useCallback, type ReactNode } from 'react';
+import { AppState } from 'react-native';
 import type { ActivityId } from '../constants/activities';
-import { ACTIVITIES } from '../constants/activities';
 import {
   createEmptySessions,
   countCompleted,
-  loadCurrentWeek,
   saveCurrentWeek,
-  loadHistory,
   saveHistory,
-  loadSettings,
   saveSettings,
   DEFAULT_SETTINGS,
   type WeekData,
   type HistoryEntry,
   type AppSettings,
 } from '../utils/storage';
-import { getCurrentMonday, toDateString, getSundayFromMonday } from '../utils/weekUtils';
+import { toDateString } from '../utils/weekUtils';
 import { syncDailyReminders } from '../utils/notifications';
+import { applyToggle, emptyWeek, loadState, toHistoryEntry } from '../services/weekStore';
+import { refreshWidgets } from '../widgets';
 
 interface DataContextType {
   currentWeek: WeekData;
@@ -29,10 +28,7 @@ interface DataContextType {
   isLoading: boolean;
 }
 
-const defaultWeek: WeekData = {
-  weekStart: toDateString(getCurrentMonday()),
-  sessions: createEmptySessions(),
-};
+const defaultWeek: WeekData = emptyWeek();
 
 const DataContext = createContext<DataContextType>({
   currentWeek: defaultWeek,
@@ -54,49 +50,37 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const hydrated = useRef(false);
+
+  // Load from storage (also handles the Monday reset). Re-run when the app comes back
+  // to the foreground so ticks made on the home-screen widget show up here.
+  const reload = useCallback(async () => {
+    try {
+      const state = await loadState();
+      setCurrentWeek(state.week);
+      setHistory(state.history);
+      setSettings(state.settings);
+    } catch (e) {
+      console.error('Failed to load saved data', e);
+    } finally {
+      setIsLoading(false);
+      hydrated.current = true;
+    }
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const [storedWeek, storedHistory, storedSettings] = await Promise.all([
-          loadCurrentWeek(),
-          loadHistory(),
-          loadSettings(),
-        ]);
+    reload();
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s === 'active') reload();
+    });
+    return () => sub.remove();
+  }, [reload]);
 
-        const currentMondayStr = toDateString(getCurrentMonday());
-        let week = storedWeek;
-        let hist = storedHistory ?? [];
-
-        if (week && week.weekStart !== currentMondayStr) {
-          // Auto-save old week to history and reset
-          const completed = countCompleted(week?.sessions ?? createEmptySessions());
-          const entry: HistoryEntry = {
-            weekStart: week.weekStart,
-            weekEnd: getSundayFromMonday(week.weekStart),
-            completed,
-            total: 7,
-            activities: { ...(week?.sessions ?? createEmptySessions()) },
-          };
-          hist = [entry, ...hist];
-          await saveHistory(hist);
-          week = { weekStart: currentMondayStr, sessions: createEmptySessions() };
-          await saveCurrentWeek(week);
-        } else if (!week) {
-          week = { weekStart: currentMondayStr, sessions: createEmptySessions() };
-          await saveCurrentWeek(week);
-        }
-
-        setCurrentWeek(week);
-        setHistory(hist);
-        if (storedSettings) setSettings(storedSettings);
-      } catch (e) {
-        console.error('Failed to load saved data', e);
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+  // Redraw home-screen widgets whenever the data they show changes
+  useEffect(() => {
+    if (!hydrated.current) return;
+    refreshWidgets({ week: currentWeek, history, settings });
+  }, [currentWeek, history, settings]);
 
   const updateSettings = useCallback((partial: Partial<AppSettings>) => {
     setSettings((prev) => {
@@ -118,38 +102,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, [isLoading, settings.remindersEnabled, settings.reminderTime, settings.lastCheckDate, settings.userName]);
 
   const toggleSession = useCallback((activityId: ActivityId, index: number) => {
+    const today = toDateString(new Date());
     const wasChecked = currentWeek?.sessions?.[activityId]?.[index] ?? false;
-    if (!wasChecked) {
-      const today = toDateString(new Date());
-      if (settings.lastCheckDate !== today) updateSettings({ lastCheckDate: today });
-    }
+    if (!wasChecked && settings.lastCheckDate !== today) updateSettings({ lastCheckDate: today });
     setCurrentWeek((prev) => {
-      const sessions = { ...(prev?.sessions ?? createEmptySessions()) };
-      const arr = [...(sessions[activityId] ?? [])];
-      if (index >= 0 && index < arr.length) {
-        arr[index] = !arr[index];
-      }
-      sessions[activityId] = arr;
-      const next = { ...prev, sessions };
+      const next = applyToggle(prev, activityId, index, today);
       saveCurrentWeek(next);
       return next;
     });
   }, [currentWeek, settings.lastCheckDate, updateSettings]);
 
   const resetWeek = useCallback(async () => {
-    const completed = countCompleted(currentWeek?.sessions ?? createEmptySessions());
-    const entry: HistoryEntry = {
-      weekStart: currentWeek?.weekStart ?? toDateString(getCurrentMonday()),
-      weekEnd: getSundayFromMonday(currentWeek?.weekStart ?? toDateString(getCurrentMonday())),
-      completed,
-      total: 7,
-      activities: { ...(currentWeek?.sessions ?? createEmptySessions()) },
-    };
-    const newHistory = [entry, ...history];
-    const newWeek: WeekData = {
-      weekStart: toDateString(getCurrentMonday()),
-      sessions: createEmptySessions(),
-    };
+    const newHistory = [toHistoryEntry(currentWeek), ...history];
+    const newWeek = emptyWeek();
     setHistory(newHistory);
     setCurrentWeek(newWeek);
     await saveHistory(newHistory);

@@ -45,3 +45,12 @@ To run it on an Android phone, use `yarn android` with an emulator or a connecte
 Notes:
 - Notifications and haptics only work on a phone, not in the browser.
 - All data stays on the device (AsyncStorage) — there is no account or server.
+
+## Home-screen widgets (Android)
+
+Two widgets ship with the installed Android app (not in Expo Go or the web preview):
+
+- **Weekly Board (4×2)** – week date, count (e.g. 3/7) and all five activities with icons. Tap a pill to tick it without opening the app.
+- **Week Strip (4×1)** – one circle per day, Mon–Sun; pink when you ticked something that day.
+
+Add them by long-pressing the home screen → Widgets → Activity Counter. Widget code lives in `react_native_space/widgets/`; the app entry `index.ts` registers the widget handler so widgets work while the app is closed.
