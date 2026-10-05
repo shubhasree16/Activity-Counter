@@ -3,7 +3,7 @@ import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useData } from '../../contexts/DataContext';
 import WeekHistoryRow from '../../components/WeekHistoryRow';
-import { Colors, Fonts, Spacing } from '../../constants/theme';
+import { Colors, Fonts, Spacing, TitleSize } from '../../constants/theme';
 import type { HistoryEntry } from '../../utils/storage';
 
 export default function HistoryScreen() {
@@ -37,10 +37,39 @@ export default function HistoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.white },
-  header: { fontFamily: Fonts.display, fontSize: 28, color: Colors.black, textAlign: 'center', paddingTop: Spacing.lg, paddingBottom: Spacing.md },
-  list: { paddingHorizontal: Spacing.xl, paddingBottom: 40 },
-  emptyWrap: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 40 },
-  emptyTitle: { fontFamily: Fonts.label, fontSize: 18, color: Colors.black },
-  emptySub: { fontFamily: Fonts.label, fontSize: 14, color: Colors.hotPink, marginTop: 8, textAlign: 'center' },
+  safe: {
+    flex: 1,
+    backgroundColor: Colors.white,
+  },
+  header: {
+    fontFamily: Fonts.display,
+    fontSize: TitleSize,
+    lineHeight: TitleSize + 4,
+    color: Colors.black,
+    textAlign: 'center',
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.md,
+  },
+  list: {
+    paddingHorizontal: Spacing.xl,
+    paddingBottom: 40,
+  },
+  emptyWrap: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontFamily: Fonts.label,
+    fontSize: 18,
+    color: Colors.black,
+  },
+  emptySub: {
+    fontFamily: Fonts.label,
+    fontSize: 14,
+    color: Colors.hotPink,
+    marginTop: 8,
+    textAlign: 'center',
+  },
 });

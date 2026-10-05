@@ -33,6 +33,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="home-outline" size={size} color={color} />
           ),
+          tabBarButtonTestID: 'tab-home',
         }}
       />
       <Tabs.Screen
@@ -42,6 +43,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="chart-bar" size={size} color={color} />
           ),
+          tabBarButtonTestID: 'tab-summary',
         }}
       />
       <Tabs.Screen
@@ -51,6 +53,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="history" size={size} color={color} />
           ),
+          tabBarButtonTestID: 'tab-history',
         }}
       />
       <Tabs.Screen
@@ -60,6 +63,7 @@ export default function TabsLayout() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="cog-outline" size={size} color={color} />
           ),
+          tabBarButtonTestID: 'tab-settings',
         }}
       />
     </Tabs>

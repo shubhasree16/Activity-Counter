@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
@@ -28,6 +29,7 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
+  // Timeout fallback to prevent stuck splash
   useEffect(() => {
     const timeout = setTimeout(() => {
       SplashScreen.hideAsync().catch(() => {});
@@ -45,6 +47,7 @@ export default function RootLayout() {
 
   return (
     <DataProvider>
+      <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="tabs" />
         <Stack.Screen name="+not-found" />

@@ -9,9 +9,10 @@ interface Props {
   activity: ActivityDef;
   sessions: boolean[];
   onToggle: (activityId: ActivityId, index: number) => void;
+  onChecked?: (x: number, y: number) => void;
 }
 
-export default function ActivityCard({ activity, sessions, onToggle }: Props) {
+export default function ActivityCard({ activity, sessions, onToggle, onChecked }: Props) {
   const safeSessions = sessions ?? [];
   const allDone = safeSessions.length > 0 && safeSessions.every(Boolean);
   const completedCount = safeSessions.filter(Boolean).length;
@@ -26,7 +27,7 @@ export default function ActivityCard({ activity, sessions, onToggle }: Props) {
           <Text style={styles.name}>{activity?.name ?? ''}</Text>
           <Text style={styles.sub}>
             {completedCount} of {activity?.target ?? 0}
-            {allDone ? ' \u00B7 ' : ''}
+            {allDone ? ' · ' : ''}
             {allDone && <Text style={styles.doneLabel}>Done</Text>}
           </Text>
         </View>
@@ -37,6 +38,7 @@ export default function ActivityCard({ activity, sessions, onToggle }: Props) {
             key={`${activity?.id ?? 'a'}-${i}`}
             checked={checked}
             onToggle={() => onToggle(activity?.id, i)}
+            onChecked={onChecked}
             accessibilityLabel={`${activity?.name ?? 'Activity'} session ${i + 1}`}
           />
         ))}

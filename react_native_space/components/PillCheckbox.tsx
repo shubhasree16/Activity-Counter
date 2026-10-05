@@ -1,17 +1,18 @@
 import React, { useRef } from 'react';
-import { Pressable, Animated, StyleSheet, Platform, Text } from 'react-native';
+import { Pressable, Animated, StyleSheet, Platform, Text, type GestureResponderEvent } from 'react-native';
 import { Colors } from '../constants/theme';
 
 interface Props {
   checked: boolean;
   onToggle: () => void;
+  onChecked?: (x: number, y: number) => void;
   accessibilityLabel: string;
 }
 
-export default function PillCheckbox({ checked, onToggle, accessibilityLabel }: Props) {
+export default function PillCheckbox({ checked, onToggle, onChecked, accessibilityLabel }: Props) {
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const handlePress = async () => {
+  const handlePress = (e: GestureResponderEvent) => {
     Animated.sequence([
       Animated.timing(scaleAnim, { toValue: 0.85, duration: 80, useNativeDriver: true }),
       Animated.spring(scaleAnim, { toValue: 1, friction: 4, useNativeDriver: true }),
@@ -20,10 +21,15 @@ export default function PillCheckbox({ checked, onToggle, accessibilityLabel }: 
     if (Platform.OS !== 'web') {
       try {
         const Haptics = require('expo-haptics');
-        Haptics?.impactAsync?.(Haptics?.ImpactFeedbackStyle?.Light);
-      } catch {}
+        Haptics?.impactAsync?.(
+          checked ? Haptics?.ImpactFeedbackStyle?.Light : Haptics?.ImpactFeedbackStyle?.Medium,
+        );
+      } catch {
+        // no haptics
+      }
     }
 
+    if (!checked) onChecked?.(e?.nativeEvent?.pageX ?? 0, e?.nativeEvent?.pageY ?? 0);
     onToggle();
   };
 
@@ -36,7 +42,7 @@ export default function PillCheckbox({ checked, onToggle, accessibilityLabel }: 
         accessibilityState={{ checked }}
         accessibilityLabel={accessibilityLabel}
       >
-        {checked && <Text style={styles.checkmark}>&#x2713;</Text>}
+        {checked && <Text style={styles.checkmark}>✓</Text>}
       </Pressable>
     </Animated.View>
   );

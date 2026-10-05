@@ -16,8 +16,28 @@ export default function NotFound() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.white, padding: 20 },
-  title: { fontFamily: Fonts.display, fontSize: 28, color: Colors.black, marginBottom: 20 },
-  btn: { backgroundColor: Colors.hotPink, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 },
-  btnText: { fontFamily: Fonts.activityName, fontSize: 16, color: Colors.white },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.white,
+    padding: 20,
+  },
+  title: {
+    fontFamily: Fonts.display,
+    fontSize: 28,
+    color: Colors.black,
+    marginBottom: 20,
+  },
+  btn: {
+    backgroundColor: Colors.hotPink,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  btnText: {
+    fontFamily: Fonts.activityName,
+    fontSize: 16,
+    color: Colors.white,
+  },
 });

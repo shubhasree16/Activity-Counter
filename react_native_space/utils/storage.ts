@@ -8,7 +8,7 @@ const KEYS = {
 } as const;
 
 export interface WeekData {
-  weekStart: string;
+  weekStart: string; // YYYY-MM-DD (Monday)
   sessions: Record<ActivityId, boolean[]>;
 }
 
@@ -22,8 +22,17 @@ export interface HistoryEntry {
 
 export interface AppSettings {
   remindersEnabled: boolean;
-  reminderTime: string;
+  reminderTime: string; // HH:mm
+  userName: string;
+  lastCheckDate: string | null; // YYYY-MM-DD of the most recent box check
 }
+
+export const DEFAULT_SETTINGS: AppSettings = {
+  remindersEnabled: true,
+  reminderTime: '21:00',
+  userName: 'Veera',
+  lastCheckDate: null,
+};
 
 export function createEmptySessions(): Record<ActivityId, boolean[]> {
   return {
@@ -61,7 +70,9 @@ export async function loadCurrentWeek(): Promise<WeekData | null> {
 export async function saveCurrentWeek(data: WeekData): Promise<void> {
   try {
     await AsyncStorage.setItem(KEYS.currentWeek, JSON.stringify(data));
-  } catch {}
+  } catch {
+    // silently fail
+  }
 }
 
 export async function loadHistory(): Promise<HistoryEntry[]> {
@@ -77,21 +88,25 @@ export async function loadHistory(): Promise<HistoryEntry[]> {
 export async function saveHistory(data: HistoryEntry[]): Promise<void> {
   try {
     await AsyncStorage.setItem(KEYS.history, JSON.stringify(data));
-  } catch {}
+  } catch {
+    // silently fail
+  }
 }
 
 export async function loadSettings(): Promise<AppSettings> {
   try {
     const raw = await AsyncStorage.getItem(KEYS.settings);
-    if (!raw) return { remindersEnabled: false, reminderTime: '08:00' };
-    return JSON.parse(raw) as AppSettings;
+    if (!raw) return { ...DEFAULT_SETTINGS };
+    return { ...DEFAULT_SETTINGS, ...(JSON.parse(raw) as Partial<AppSettings>) };
   } catch {
-    return { remindersEnabled: false, reminderTime: '08:00' };
+    return { ...DEFAULT_SETTINGS };
   }
 }
 
 export async function saveSettings(data: AppSettings): Promise<void> {
   try {
     await AsyncStorage.setItem(KEYS.settings, JSON.stringify(data));
-  } catch {}
+  } catch {
+    // silently fail
+  }
 }
