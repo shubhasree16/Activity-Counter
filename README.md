@@ -23,6 +23,10 @@ A personal weekly fitness tracker built with React Native (Expo).
 - Flat SVG icons, pill-shaped checkboxes
 - Auto-resets every Monday
 
+## Screenshots
+![Veera’s Activity Counter App Screen](react_native_space/assets/app_homescreen.png)
+![Veera’s Activity Counter Widget](react_native_space/assets/widget-preview/week_strip.png)
+
 ## Tech Stack
 - React Native + Expo
 - AsyncStorage for local persistence
