@@ -24,7 +24,13 @@ A personal weekly fitness tracker built with React Native (Expo).
 - Auto-resets every Monday
 
 ## Screenshots
+
+### App Homescreen
+
 ![Veera’s Activity Counter App Screen](react_native_space/assets/app_homescreen.png)
+
+### App Widget
+
 ![Veera’s Activity Counter Widget](react_native_space/assets/widget-preview/week_strip.png)
 
 ## Tech Stack
